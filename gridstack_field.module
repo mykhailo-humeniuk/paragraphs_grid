@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @file
+ * Contains main hook definitions for Gridstack_field module.
+ */
+
+// Include module files from /includes folder.
+gridstack_field_include('api');
+
+/**
+ * Load file from /includes folder.
+ */
+function gridstack_field_include($file) {
+  module_load_include('inc', 'gridstack_field', 'includes/gridstack_field.' . $file);
+}
