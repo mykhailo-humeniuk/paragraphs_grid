@@ -5,6 +5,7 @@ sites/*/*settings*.php
 files/
 sites/*/files
 sites/*/private
+.idea
 
 # Ignore default text files
 robots.txt
@@ -28,7 +29,6 @@ index.php
 install.php
 update.php
 xmlrpc.php
-/includes
 /misc
 /modules
 /profiles
