@@ -1,0 +1,4 @@
+name = Gridstack field
+description = "Add a formatter "
+package = Fields
+core = 7.x
