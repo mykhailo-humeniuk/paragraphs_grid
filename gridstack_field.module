@@ -56,3 +56,87 @@ function gridstack_field_help($path, $arg) {
       return $output;
   }
 }
+
+/**
+ * Implements hook_theme().
+ */
+function gridstack_field_theme() {
+  return array(
+    'gridstack_field_field_multiple_value_form' => array(
+      'render element' => 'element',
+    ),
+  );
+}
+
+/**
+ * Returns HTML for an individual form element.
+ *
+ * Combine multiple values into a table with drag-n-drop reordering.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - element: A render element representing the form element.
+ *
+ * @ingroup themeable
+ */
+function theme_gridstack_field_field_multiple_value_form($variables) {
+  $element = $variables['element'];
+  $output = '';
+  $instance = $element['#instance'];
+
+  if (!isset($instance['settings']['title'])) {
+    $instance['settings']['title'] = PARAGRAPHS_DEFAULT_TITLE;
+  }
+  if (!isset($instance['settings']['title_multiple'])) {
+    $instance['settings']['title_multiple'] = PARAGRAPHS_DEFAULT_TITLE_MULTIPLE;
+  }
+
+  $add_mode = (isset($instance['settings']['add_mode']) ? $instance['settings']['add_mode'] : PARAGRAPHS_DEFAULT_ADD_MODE);
+  $required = !empty($element['#required']) ? theme('form_required_marker', $variables) : '';
+
+  // Sort items according to '_weight' (needed when the form comes back after
+  // preview or failed validation)
+  $items = array();
+  foreach (element_children($element) as $key) {
+    if ($key === 'add_more') {
+      $add_more_button = &$element[$key];
+    }
+    elseif ($key === 'add_more_type') {
+      $add_more_button_type = &$element[$key];
+    }
+    else {
+      if (!isset($element[$key]['#access']) || $element[$key]['#access']) {
+        $items[] = &$element[$key];
+      }
+    }
+  }
+  usort($items, '_field_sort_items_value_helper');
+
+  $output = '<div class="form-item form-item-grid">';
+  // Add the items to grid.
+  if (count($items)) {
+    foreach ($items as $key => $item) {
+      // Build grid with items.
+      $output .= theme('container', array(
+        'element' => array('#children' => '<div class="grid-stack-item-content">' . drupal_render($item) . '</div>',
+          '#attributes' => array(
+            'class' => array('grid-stack-item'),
+            'data-delta' => $key,
+          ))
+      ));
+    }
+  }
+  else {
+    $add_text = 'No @title_multiple added yet. Select a @title type and press the button below to add one.';
+    if ($add_mode == 'button') {
+      $add_text = 'No @title_multiple added yet. Select a @title type and press a button below to add one.';
+    }
+    $output .= '<label>' . t('!title !required', array('!title' => $element['#title'], '!required' => $required)) . "</label>";
+    $output .= '<p><em>' . t($add_text, array('@title_multiple' => t($instance['settings']['title_multiple']), '@title' => t($instance['settings']['title']))) . '</em></p>';
+  }
+  $output .= $element['#description'] ? '<div class="description">' . $element['#description'] . '</div>' : '';
+  $output .= '</div>';
+  $output .= '<div class="clearfix">' . drupal_render($add_more_button_type) . drupal_render($add_more_button) . '</div>';
+
+  return $output;
+}
