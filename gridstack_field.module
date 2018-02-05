@@ -8,9 +8,51 @@
 // Include module files from /includes folder.
 gridstack_field_include('api');
 
+// Load all Field module hooks for Gridstack.
+require_once 'field/gridstack_field.field.inc';
+
 /**
  * Load file from /includes folder.
  */
 function gridstack_field_include($file) {
   module_load_include('inc', 'gridstack_field', 'includes/gridstack_field.' . $file);
+}
+
+/**
+ * Implements hook_help().
+ */
+function gridstack_field_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#gridstack_field':
+
+      $filepath = dirname(__FILE__) . '/README.md';
+      if (file_exists($filepath)) {
+        $readme = file_get_contents($filepath);
+      }
+      else {
+        $filepath = dirname(__FILE__) . '/README.txt';
+        if (file_exists($filepath)) {
+          $readme = file_get_contents($filepath);
+        }
+      }
+      if (!isset($readme)) {
+        return NULL;
+      }
+      if (module_exists('markdown')) {
+        $filters = module_invoke('markdown', 'filter_info');
+        $info = $filters['filter_markdown'];
+
+        if (function_exists($info['process callback'])) {
+          $output = $info['process callback']($readme, NULL);
+        }
+        else {
+          $output = '<pre>' . $readme . '</pre>';
+        }
+      }
+      else {
+        $output = '<pre>' . $readme . '</pre>';
+      }
+
+      return $output;
+  }
 }
