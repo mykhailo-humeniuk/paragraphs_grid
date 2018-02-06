@@ -140,3 +140,34 @@ function theme_gridstack_field_field_multiple_value_form($variables) {
 
   return $output;
 }
+
+/**
+ * Implements hook_library().
+ */
+function gridstack_field_library() {
+  $libraries = array();
+  $libraries['gridstack'] = array(
+    'title' => 'Gridtack library',
+    'website' => 'http://gridstackjs.com/',
+    'version' => '0.3.0',
+    'js' => array(
+      '//cdn.jsdelivr.net/npm/lodash@4.17.5/lodash.min.js' => array(
+        'type' => 'external',
+      ),
+      '//cdnjs.cloudflare.com/ajax/libs/gridstack.js/0.3.0/gridstack.min.js' => array(
+        'type' => 'external',
+      ),
+      '//cdnjs.cloudflare.com/ajax/libs/gridstack.js/0.3.0/gridstack.jQueryUI.min.js' => array(
+        'type' => 'external',
+      ),
+      drupal_get_path('module', 'gridstack_field') . '/js/gridstack_field.js' => array(),
+    ),
+    'css' => array(
+      '//cdnjs.cloudflare.com/ajax/libs/gridstack.js/0.3.0/gridstack.min.css' => array(
+        'type' => 'external',
+      ),
+    ),
+  );
+
+  return $libraries;
+}

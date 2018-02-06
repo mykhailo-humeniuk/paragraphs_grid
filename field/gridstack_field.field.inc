@@ -49,6 +49,8 @@ function gridstack_field_field_multiple_value_form($field, $instance, $langcode,
   $field_elements = paragraphs_field_multiple_value_form($field, $instance, $langcode, $items, $form, $form_state, $delta, $original_element);
   // Use own theme function.
   $field_elements['#theme'] = 'gridstack_field_field_multiple_value_form';
+  // Install Gridstack library on the page.
+  drupal_add_library('gridstack_field', 'gridstack', FALSE);
   return $field_elements;
 }
 
