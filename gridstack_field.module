@@ -58,6 +58,20 @@ function gridstack_field_help($path, $arg) {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function gridstack_field_menu() {
+  $items = array();
+  $items['grid_update'] = array(
+    'page callback' => 'gridstack_grid_callback',
+    'delivery callback' => 'ajax_deliver',
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
  * Implements hook_theme().
  */
 function gridstack_field_theme() {
@@ -112,18 +126,59 @@ function theme_gridstack_field_field_multiple_value_form($variables) {
   }
   usort($items, '_field_sort_items_value_helper');
 
-  $output = '<div class="form-item form-item-grid">';
+  $output = '<div class="form-item form-item-grid grid-stack">';
   // Add the items to grid.
   if (count($items)) {
-    foreach ($items as $key => $item) {
-      // Build grid with items.
-      $output .= theme('container', array(
-        'element' => array('#children' => '<div class="grid-stack-item-content">' . drupal_render($item) . '</div>',
-          '#attributes' => array(
-            'class' => array('grid-stack-item'),
-            'data-delta' => $key,
-          ))
-      ));
+    // Such as Paragraphs rebuild field structure every time when user
+    // add, edit, or remove item we decided to use drupal ccache as temporary
+    // storage with grid parameters for using when field rebuilds.
+    $cached_data = cache_get('grid_items' . session_id());
+    // If exist cache fill grid items parameters from grid.
+    if (!empty($cached_data)) {
+      $data = $cached_data->data;
+      foreach ($items as $key => $item) {
+        // Find item with highest Y parameter.
+        if (!isset($data[$key])) {
+          $temporary_json_data = $data;
+          usort($temporary_json_data, function($a, $b) {
+            if ($a['y'] == $b['y']) {
+              return 0;
+            }
+            return $a['y'] < $b['y'] ? 1 : -1;
+          });
+          $max_y = $temporary_json_data[0]['y'] + $temporary_json_data[0]['height'];
+        }
+
+        // Build grid with items.
+        $output .= theme('container', array(
+          'element' => array('#children' => '<div class="grid-stack-item-content">' . drupal_render($item) . '</div>',
+            '#attributes' => array(
+              'class' => array('grid-stack-item'),
+              'data-gs-x' => isset($data[$key]) ? $data[$key]['x'] : 0,
+              'data-gs-y' => isset($data[$key]) ? $data[$key]['y'] : (isset($max_y) ? $max_y : 0),
+              'data-gs-width' => isset($data[$key]) ? $data[$key]['width'] : 3,
+              'data-gs-height' => isset($data[$key]) ? $data[$key]['height'] : 6,
+              'data-delta' => $key,
+            ))
+        ));
+      }
+    }
+    // Use data from JSON field for creating grid items.
+    else {
+      foreach ($items as $key => $item) {
+        // Build grid with items.
+        $output .= theme('container', array(
+          'element' => array('#children' => '<div class="grid-stack-item-content">' . drupal_render($item) . '</div>',
+            '#attributes' => array(
+              'class' => array('grid-stack-item'),
+              'data-gs-x' => !empty($item['field_position_x'][LANGUAGE_NONE][0]['value']['#value']) ? $item['field_position_x'][LANGUAGE_NONE][0]['value']['#value'] : 0,
+              'data-gs-y' => !empty($item['field_position_y'][LANGUAGE_NONE][0]['value']['#value']) ? $item['field_position_y'][LANGUAGE_NONE][0]['value']['#value'] : 0,
+              'data-gs-width' => !empty($item['field_position_width'][LANGUAGE_NONE][0]['value']['#value']) ? $item['field_position_width'][LANGUAGE_NONE][0]['value']['#value'] : 3,
+              'data-gs-height' => !empty($item['field_position_height'][LANGUAGE_NONE][0]['value']['#value']) ? $item['field_position_height'][LANGUAGE_NONE][0]['value']['#value'] : 6,
+              'data-delta' => $key,
+            ))
+        ));
+      }
     }
   }
   else {
@@ -151,6 +206,9 @@ function gridstack_field_library() {
     'website' => 'http://gridstackjs.com/',
     'version' => '0.3.0',
     'js' => array(
+      '//code.jquery.com/ui/1.12.1/jquery-ui.min.js' => array(
+        'type' => 'external',
+      ),
       '//cdn.jsdelivr.net/npm/lodash@4.17.5/lodash.min.js' => array(
         'type' => 'external',
       ),
@@ -170,4 +228,19 @@ function gridstack_field_library() {
   );
 
   return $libraries;
+}
+
+/**
+ * Callback function for saving JSON with grid parameters into drupal
+ * cache storage.
+ *
+ * Such us Paragraphs rebuild field structure every time when user
+ * add, edit, or remove item we decided to use drupal ccache as temporary
+ * storage with grid parameters for using when field rebuilds.
+ */
+function gridstack_grid_callback() {
+  if (!empty($_POST['grid_items'])) {
+    $data = drupal_json_decode($_POST['grid_items']);
+    cache_set('grid_items' . session_id(), $data, 'cache', CACHE_PERMANENT);
+  }
 }
