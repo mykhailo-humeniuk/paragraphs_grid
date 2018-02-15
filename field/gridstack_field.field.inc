@@ -11,11 +11,13 @@ function gridstack_field_field_widget_info() {
       'label' => t('Gridstack'),
       'field types' => array('paragraphs'),
       'settings' => array(
-        'width' => 12,
-        'alwaysShowResizeHandle' => false,
-        'cellHeight' => 60,
-        'verticalMargin' => 20,
-        'height' => 0,
+        'grid_settings' => array(
+          'width' => 12,
+          'alwaysShowResizeHandle' => false,
+          'cellHeight' => 60,
+          'verticalMargin' => 20,
+          'height' => 0,
+        ),
       ),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
@@ -25,65 +27,16 @@ function gridstack_field_field_widget_info() {
   );
 }
 
-/**
- * Implements hook_field_widget_form().
- */
-function gridstack_field_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-  switch ($instance['widget']['type']) {
-    case 'paragraphs_gridstack':
-      return gridstack_field_field_multiple_value_form($field, $instance, $langcode, $items, $form, $form_state, $delta, $element);
-      break;
-  }
+function gridstack_field_field_widget_settings_form($field, $instance) {
+  $widget = $instance['widget'];
+  $settings = $widget['settings']['grid_settings'];
+  $form = array();
 
-}
-
-/**
- * Special handling to create form elements for multiple values.
- *
- * Handles generic features for multiple fields:
- * - number of widgets
- * - AHAH-'add more' button
- * - drag-n-drop value reordering
- */
-function gridstack_field_field_multiple_value_form($field, $instance, $langcode, $items, &$form, &$form_state, $delta, $original_element) {
-  $field_elements = paragraphs_field_multiple_value_form($field, $instance, $langcode, $items, $form, $form_state, $delta, $original_element);
-  // Use own theme function.
-  $field_elements['#theme'] = 'gridstack_field_field_multiple_value_form';
-  // Install Gridstack library on the page.
-  drupal_add_library('gridstack_field', 'gridstack', FALSE);
-  return $field_elements;
-}
-
-/**
- * Widget form implementation for paragraphs.
- *
- * @param $form
- * @param $form_state
- * @param $field
- * @param $instance
- * @param $langcode
- * @param $items
- * @param $delta
- * @param $element
- *
- * @return array
- */
-function gridstack_field_field_widget_form_build(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-  $element = paragraphs_field_widget_form_build($form, $form_state, $field, $instance, $langcode, $items, $delta, $element);
-  return $element;
-}
-
-/**
- * Implements hook_form_field_ui_field_edit_form_alter().
- */
-function gridstack_field_form_field_ui_field_edit_form_alter(&$form, $form_state) {
-  if ($form['#field']['type'] == 'paragraphs' && $form['#instance']['widget']['type'] == 'paragraphs_gridstack') {
-    $settings = $form['#instance']['widget']['settings'];
-
+  if ($widget['type'] == 'paragraphs_gridstack') {
     $form['grid_settings'] = array(
       '#type' => 'fieldset',
       '#title' => t('Grid settings'),
-      '#weight' => 5,
+      '#weight' => 9999,
       '#collapsible' => FALSE,
       '#collapsed' => FALSE,
     );
@@ -123,23 +76,54 @@ function gridstack_field_form_field_ui_field_edit_form_alter(&$form, $form_state
       '#size' => 60,
       '#maxlength' => 128,
     );
+  }
 
-    array_unshift($form['#submit'], 'gridstack_field_ui_field_edit_form_submit');
+  return $form;
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function gridstack_field_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  switch ($instance['widget']['type']) {
+    case 'paragraphs_gridstack':
+      return gridstack_field_field_multiple_value_form($field, $instance, $langcode, $items, $form, $form_state, $delta, $element);
+      break;
   }
 }
 
 /**
- * @param $form
- * @param $form_state
+ * Special handling to create form elements for multiple values.
  *
- * Submit function for saving grid settings into widget.
+ * Handles generic features for multiple fields:
+ * - number of widgets
+ * - AHAH-'add more' button
+ * - drag-n-drop value reordering
  */
-function gridstack_field_ui_field_edit_form_submit($form, &$form_state) {
-  $settings = $form_state['values']['instance']['widget']['settings'];
-  $settings['width'] = $form_state['values']['width'];
-  $settings['cellHeight'] = $form_state['values']['cellHeight'];
-  $settings['height'] = $form_state['values']['height'];
-  $settings['alwaysShowResizeHandle'] = $form_state['values']['alwaysShowResizeHandle'];
-  $settings['verticalMargin'] = $form_state['values']['verticalMargin'];
+function gridstack_field_field_multiple_value_form($field, $instance, $langcode, $items, &$form, &$form_state, $delta, $original_element) {
+  $field_elements = paragraphs_field_multiple_value_form($field, $instance, $langcode, $items, $form, $form_state, $delta, $original_element);
+  // Use own theme function.
+  $field_elements['#theme'] = 'gridstack_field_field_multiple_value_form';
+  // Install Gridstack library on the page.
+  drupal_add_library('gridstack_field', 'gridstack', FALSE);
+  return $field_elements;
 }
 
+/**
+ * Widget form implementation for paragraphs.
+ *
+ * @param $form
+ * @param $form_state
+ * @param $field
+ * @param $instance
+ * @param $langcode
+ * @param $items
+ * @param $delta
+ * @param $element
+ *
+ * @return array
+ */
+function gridstack_field_field_widget_form_build(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  $element = paragraphs_field_widget_form_build($form, $form_state, $field, $instance, $langcode, $items, $delta, $element);
+  return $element;
+}

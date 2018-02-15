@@ -12,9 +12,9 @@
    * Add data to json field and send to drupal callback.
    */
   function _saveParagraphPosition(jsonData) {
-    let { basePath, pathPrefix } = Drupal.settings;
-    let href = `${basePath}${pathPrefix}grid_update`;
-    let post = "grid_items=" + JSON.stringify(jsonData);
+    const { basePath, pathPrefix } = Drupal.settings;
+    const href = `${basePath}${pathPrefix}grid_update`;
+    const post = "grid_items=" + JSON.stringify(jsonData);
     let { localStorage } = window;
     localStorage.setItem('gridItems', JSON.stringify(jsonData));
     

@@ -8,7 +8,7 @@
 /**
  * Implements hook_schema().
  */
-function gridstack_field_schema($field) {
+function gridstack_field_schema() {
 
   $schema['gridstack'] = array(
     'description' => 'This table contains gridstack setings',
