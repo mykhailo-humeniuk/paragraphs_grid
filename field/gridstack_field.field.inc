@@ -101,12 +101,34 @@ function gridstack_field_field_widget_form(&$form, &$form_state, $field, $instan
  * - drag-n-drop value reordering
  */
 function gridstack_field_field_multiple_value_form($field, $instance, $langcode, $items, &$form, &$form_state, $delta, $original_element) {
+  $form['#submit'][] = 'gridstack_field_field_widget_form_submit';
   $field_elements = paragraphs_field_multiple_value_form($field, $instance, $langcode, $items, $form, $form_state, $delta, $original_element);
   // Use own theme function.
   $field_elements['#theme'] = 'gridstack_field_field_multiple_value_form';
   // Install Gridstack library on the page.
   drupal_add_library('gridstack_field', 'gridstack', FALSE);
+
+  // .
+  if ($form['nid']['#value']) {
+    $db_data = gridstack_field_load($form['nid']['#value']);
+    cache_set('grid_items' . session_id(), $db_data->data, 'cache', CACHE_PERMANENT);
+  }
   return $field_elements;
+}
+
+/**
+ * .
+ */
+function gridstack_field_field_widget_form_submit($form, &$form_state) {
+  if ($form['nid']['#value']) {
+    $cached_data = cache_get('grid_items' . session_id());
+    gridstack_field_save($form['nid']['#value'], $cached_data->data);
+
+    // cache_clear_all('grid_items' . session_id());
+    // Hack for clearing cache.
+    // TODO need to refactor this.
+    cache_set('grid_items' . session_id(), NULL, 'cache', REQUEST_TIME);
+  }
 }
 
 /**

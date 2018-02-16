@@ -244,3 +244,25 @@ function gridstack_grid_callback() {
     cache_set('grid_items' . session_id(), $data, 'cache', CACHE_PERMANENT);
   }
 }
+
+/**
+ * Implements hook_node_insert().
+ */
+function gridstack_field_node_insert($node) {
+  $cached_data = cache_get('grid_items' . session_id());
+  if ($cached_data) {
+    gridstack_field_save($node->nid, $cached_data->data);
+
+    // cache_clear_all('grid_items' . session_id());
+    // Hack for clearing cache.
+    // TODO need to refactor this.
+    cache_set('grid_items' . session_id(), NULL, 'cache', REQUEST_TIME);
+  }
+}
+
+/**
+ * Just for testing during development process.
+ */
+//function gridstack_field_init() {
+//  $cached_data = cache_get('grid_items' . session_id());
+//}

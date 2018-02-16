@@ -14,7 +14,7 @@
  * @param $data
  *   Data that contains gridstack data.
  */
-function sgridstack_field_save($nid, $data) {
+function gridstack_field_save($nid, $data) {
 
   $gridstack = new stdClass();
   $gridstack->nid = $nid;
