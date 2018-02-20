@@ -266,3 +266,20 @@ function gridstack_field_node_insert($node) {
 //function gridstack_field_init() {
 //  $cached_data = cache_get('grid_items' . session_id());
 //}
+
+/**
+ * Act on a node object about to be shown on the add/edit form.
+ *
+ * This hook is invoked from node_object_prepare() after the type-specific
+ * hook_prepare() is invoked.
+ *
+ * @param $node
+ *   The node that is about to be shown on the add/edit form.
+ *
+ * @ingroup node_api_hooks
+ */
+//function hook_node_prepare($node) {
+//  if (!isset($node->comment)) {
+//    $node->comment = variable_get("comment_$node->type", COMMENT_NODE_OPEN);
+//  }
+//}
