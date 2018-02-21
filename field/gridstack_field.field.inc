@@ -150,3 +150,52 @@ function gridstack_field_field_widget_form_build(&$form, &$form_state, $field, $
   $element = paragraphs_field_widget_form_build($form, $form_state, $field, $instance, $langcode, $items, $delta, $element);
   return $element;
 }
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function gridstack_field_field_formatter_info() {
+  return array(
+    'gridstack_view' => array(
+      'label' => t('Gridstack items'),
+      'field types' => array('paragraphs'),
+      'settings' =>  array(
+        'view_mode' => 'full',
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function gridstack_field_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  $settings = $display['settings'];
+  switch ($display['type']) {
+    case 'gridstack_view':
+
+      // Prevent displaying useless markup if we don't have any values.
+      if (empty($items)) {
+        return $element;
+      }
+      // Get view mode from entity.
+      $display_view_mode = empty($display['settings']['view_mode']) ? 'full' : $display['settings']['view_mode'];
+      // Get view mode from field instance (if configured).
+      $view_mode = empty($instance['display'][$display_view_mode]['settings']['view_mode']) ? $display_view_mode : $instance['display'][$display_view_mode]['settings']['view_mode'];
+      $element['#theme_wrappers'] = array('gridstack_field_items');
+      $element['#view_mode'] = $view_mode;
+
+      foreach ($items as $delta => $item) {
+        if ($paragraph = paragraphs_field_get_entity($item)) {
+          $paragraph->setHostEntity($entity_type, $entity, $langcode);
+          if (entity_access('view', 'paragraphs_item', $paragraph)) {
+            $element[$delta]['entity'] = $paragraph->view($view_mode);
+          }
+        }
+      }
+      break;
+  }
+  return $element;
+}
+
