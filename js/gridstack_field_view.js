@@ -25,8 +25,10 @@
         let items = [];
         let viewGridContent = $('.grid-stack');
         let nodes = viewGridContent.find('.grid-stack-item');
-        let height = Drupal.settings.gridstack_field.cellHeight ? Drupal.settings.gridstack_field.cellHeight : 50;
-        let verticalMargin = Drupal.settings.gridstack_field.verticalMargin ? Drupal.settings.gridstack_field.verticalMargin :  0;
+        const height = 50;
+        const verticalMargin = 0;
+        // let height = Drupal.settings.gridstack_field.cellHeight ? Drupal.settings.gridstack_field.cellHeight : 50;
+        // let verticalMargin = Drupal.settings.gridstack_field.verticalMargin ? Drupal.settings.gridstack_field.verticalMargin :  0;
 
 
         nodes.each(function() {

@@ -215,12 +215,12 @@ function theme_gridstack_field_items($variables) {
   $element = $variables['element'];
   $output = '';
 
-  drupal_add_js(array(
-    'gridstack_field' => array(
-      'cellHeight'      => $gridstack_setting->data['cellHeight'],
-      'verticalMargin ' => $gridstack_setting->data['verticalMargin'],
-    ),
-  ), 'setting');
+//  drupal_add_js(array(
+//    'gridstack_field' => array(
+//      'cellHeight'      => $gridstack_setting->data['cellHeight'],
+//      'verticalMargin ' => $gridstack_setting->data['verticalMargin'],
+//    ),
+//  ), 'setting');
   drupal_add_library('gridstack_field', 'gridstack_view', FALSE);
 
   // Sort items according to '_weight' (needed when the form comes back after
@@ -235,7 +235,7 @@ function theme_gridstack_field_items($variables) {
   $output = '<div class="form-item form-item-grid grid-stack width-' . $gridstack_setting->data['width'] . '">';
   // Add the items to grid.
   if (count($items)) {
-    $gridstack_setting_data = drupal_json_decode($gridstack_setting->data['data']);
+    $gridstack_setting_data = $gridstack_setting->data;
     foreach ($items as $key => $item) {
       // Build grid with items.
       $output .= theme('container', array(
@@ -341,3 +341,7 @@ function gridstack_field_node_insert($node) {
   }
 }
 
+//function gridstack_field_init() {
+//  $buuu = cache_get('grid_items' . session_id());
+//  dsm($buuu);
+//}
