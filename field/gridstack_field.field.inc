@@ -110,7 +110,8 @@ function gridstack_field_field_multiple_value_form($field, $instance, $langcode,
 
   // .
   if ($form['nid']['#value']) {
-    cache_set('grid_items' . session_id(), NULL, 'cache', REQUEST_TIME);
+    cache_clear_all('grid_items' . session_id(), 'cache', FALSE);
+
     $db_data = gridstack_field_load($form['nid']['#value']);
     cache_set('grid_items' . session_id(), $db_data->data, 'cache', CACHE_PERMANENT);
   }
@@ -125,10 +126,7 @@ function gridstack_field_field_widget_form_submit($form, &$form_state) {
     $cached_data = cache_get('grid_items' . session_id());
     gridstack_field_save($form['nid']['#value'], $cached_data->data);
 
-    // cache_clear_all('grid_items' . session_id());
-    // Hack for clearing cache.
-    // TODO need to refactor this.
-    cache_set('grid_items' . session_id(), NULL, 'cache', REQUEST_TIME);
+    cache_clear_all('grid_items' . session_id(), 'cache', FALSE);
   }
 }
 

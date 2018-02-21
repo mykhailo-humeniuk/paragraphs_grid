@@ -334,14 +334,6 @@ function gridstack_field_node_insert($node) {
   if ($cached_data) {
     gridstack_field_save($node->nid, $cached_data->data);
 
-    // cache_clear_all('grid_items' . session_id());
-    // Hack for clearing cache.
-    // TODO need to refactor this.
-    cache_set('grid_items' . session_id(), NULL, 'cache', REQUEST_TIME);
+    cache_clear_all('grid_items' . session_id(), 'cache', FALSE);
   }
 }
-
-//function gridstack_field_init() {
-//  $buuu = cache_get('grid_items' . session_id());
-//  dsm($buuu);
-//}
