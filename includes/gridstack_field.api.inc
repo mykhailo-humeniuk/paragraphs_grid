@@ -19,8 +19,6 @@ function gridstack_field_save($nid, $data) {
   $gridstack = new stdClass();
   $gridstack->nid = $nid;
   $gridstack->data = $data;
-  $gridstack->original = gridstack_field_load($nid);
-
   // Save gridstack data into the database.
   db_merge('gridstack')
     ->key(array('nid' => $gridstack->nid))

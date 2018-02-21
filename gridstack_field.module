@@ -79,8 +79,12 @@ function gridstack_field_theme() {
     'gridstack_field_field_multiple_value_form' => array(
       'render element' => 'element',
     ),
+    'gridstack_field_items' => array(
+      'render element' => 'element',
+    ),
   );
 }
+
 
 /**
  * Returns HTML for an individual form element.
@@ -196,6 +200,66 @@ function theme_gridstack_field_field_multiple_value_form($variables) {
   return $output;
 }
 
+
+/**
+ * Returns HTML for an gridstack items.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - element: A render element representing the form element.
+ *
+ * @ingroup themeable
+ */
+function theme_gridstack_field_items($variables) {
+  $gridstack_setting = gridstack_field_load($variables['element']['#object']->nid);
+  $element = $variables['element'];
+  $output = '';
+
+  drupal_add_js(array(
+    'gridstack_field' => array(
+      'cellHeight'      => $gridstack_setting->data['cellHeight'],
+      'verticalMargin ' => $gridstack_setting->data['verticalMargin'],
+    ),
+  ), 'setting');
+  drupal_add_library('gridstack_field', 'gridstack_view', FALSE);
+
+  // Sort items according to '_weight' (needed when the form comes back after
+  // preview or failed validation)
+  $items = array();
+  foreach (element_children($element) as $key) {
+    if (!isset($element[$key]['#access']) || $element[$key]['#access']) {
+      $items[] = &$element[$key];
+    }
+  }
+
+  $output = '<div class="form-item form-item-grid grid-stack width-' . $gridstack_setting->data['width'] . '">';
+  // Add the items to grid.
+  if (count($items)) {
+    $gridstack_setting_data = drupal_json_decode($gridstack_setting->data['data']);
+    foreach ($items as $key => $item) {
+      // Build grid with items.
+      $output .= theme('container', array(
+        'element' => array('#children' => '<div class="grid-stack-item-content">' . drupal_render($item) . '</div>',
+          '#attributes' => array(
+            'class' => array('grid-stack-item'),
+            'data-gs-x' => !empty($gridstack_setting_data[$key]['x']) ? $gridstack_setting_data[$key]['x'] : 0,
+            'data-gs-y' => !empty($gridstack_setting_data[$key]['y']) ? $gridstack_setting_data[$key]['y'] : 0,
+            'data-gs-width' => !empty($gridstack_setting_data[$key]['width']) ? $gridstack_setting_data[$key]['width'] : 3,
+            'data-gs-height' => !empty($gridstack_setting_data[$key]['height']) ? $gridstack_setting_data[$key]['height'] : 6,
+            'data-delta' => $key,
+          ))
+      ));
+    }
+  }
+  else {
+    $add_text = 'No @title_multiple added yet.';
+    $output .= '<p><em>' . t($add_text) . '</em></p>';
+  }
+  $output .= '</div>';
+
+  return $output;
+}
+
 /**
  * Implements hook_library().
  */
@@ -224,6 +288,23 @@ function gridstack_field_library() {
       '//cdnjs.cloudflare.com/ajax/libs/gridstack.js/0.3.0/gridstack.min.css' => array(
         'type' => 'external',
       ),
+    ),
+  );
+  $libraries['gridstack_view'] = array(
+    'title' => 'Gridtack library for view page',
+    'website' => 'http://gridstackjs.com/',
+    'version' => '0.3.0',
+    'js' => array(
+      '//cdn.jsdelivr.net/npm/lodash@4.17.5/lodash.min.js' => array(
+        'type' => 'external',
+      ),
+      drupal_get_path('module', 'gridstack_field') . '/js/gridstack_field_view.js' => array(),
+    ),
+    'css' => array(
+      '//cdnjs.cloudflare.com/ajax/libs/gridstack.js/0.3.0/gridstack.min.css' => array(
+        'type' => 'external',
+      ),
+      drupal_get_path('module', 'gridstack_field') . '/css/gridstack_field.min.css' => array(),
     ),
   );
 
@@ -259,10 +340,3 @@ function gridstack_field_node_insert($node) {
     cache_set('grid_items' . session_id(), NULL, 'cache', REQUEST_TIME);
   }
 }
-
-/**
- * Just for testing during development process.
- */
-//function gridstack_field_init() {
-//  $cached_data = cache_get('grid_items' . session_id());
-//}

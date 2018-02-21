@@ -47,7 +47,7 @@
         float: false
       };
       let myStorage = window.localStorage;
-  
+
       $fieldGridstack.gridstack(options);
 
       // Fill in JSON field with parameters from grid items.
@@ -56,7 +56,7 @@
         let $grid_items = $grid_container.find('.grid-stack-item.ui-draggable.ui-resizable');
         let myStorage = window.localStorage;
         let jsonFieldData = (myStorage.getItem('gridItems')) ? JSON.parse(myStorage.getItem('gridItems')) : [];
-        
+
         // Fill in cache if field with json is not empty.
         if (jsonFieldData.length || $grid_items.length) {
           if ($grid_items.length === jsonFieldData.length) {
@@ -140,6 +140,7 @@
           });
         });
       })();
+
     }
   };
 })(jQuery, Drupal, Drupal.settings);
