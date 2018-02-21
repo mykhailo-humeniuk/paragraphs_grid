@@ -340,3 +340,4 @@ function gridstack_field_node_insert($node) {
     cache_set('grid_items' . session_id(), NULL, 'cache', REQUEST_TIME);
   }
 }
+

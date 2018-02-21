@@ -110,6 +110,7 @@ function gridstack_field_field_multiple_value_form($field, $instance, $langcode,
 
   // .
   if ($form['nid']['#value']) {
+    cache_set('grid_items' . session_id(), NULL, 'cache', REQUEST_TIME);
     $db_data = gridstack_field_load($form['nid']['#value']);
     cache_set('grid_items' . session_id(), $db_data->data, 'cache', CACHE_PERMANENT);
   }
