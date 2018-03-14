@@ -101,6 +101,8 @@ function theme_gridstack_field_field_multiple_value_form($variables) {
   $element = $variables['element'];
   $output = '';
   $instance = $element['#instance'];
+  $cached_data = cache_get('grid_items' . session_id());
+  $columns = (!empty($cached_data) || !empty($cached_data->data['settings']['width'])) ? $cached_data->data['settings']['width'] : 12;
 
   if (!isset($instance['settings']['title'])) {
     $instance['settings']['title'] = PARAGRAPHS_DEFAULT_TITLE;
@@ -130,16 +132,15 @@ function theme_gridstack_field_field_multiple_value_form($variables) {
   }
   usort($items, '_field_sort_items_value_helper');
 
-  $output = '<div class="form-item form-item-grid grid-stack">';
+  $output = '<div class="form-item form-item-grid grid-stack width-' . $columns . '"">';
   // Add the items to grid.
   if (count($items)) {
     // Such as Paragraphs rebuild field structure every time when user
     // add, edit, or remove item we decided to use drupal ccache as temporary
     // storage with grid parameters for using when field rebuilds.
-    $cached_data = cache_get('grid_items' . session_id());
     // If exist cache fill grid items parameters from grid.
     if (!empty($cached_data)) {
-      $data = $cached_data->data;
+      $data = $cached_data->data['items'];
       foreach ($items as $key => $item) {
         // Find item with highest Y parameter.
         if (!isset($data[$key])) {
@@ -213,15 +214,11 @@ function theme_gridstack_field_field_multiple_value_form($variables) {
 function theme_gridstack_field_items($variables) {
   $gridstack_setting = gridstack_field_load($variables['element']['#object']->nid);
   $element = $variables['element'];
+  $columns = $gridstack_setting->data['settings']['width'];
   $output = '';
 
-//  drupal_add_js(array(
-//    'gridstack_field' => array(
-//      'cellHeight'      => $gridstack_setting->data['cellHeight'],
-//      'verticalMargin ' => $gridstack_setting->data['verticalMargin'],
-//    ),
-//  ), 'setting');
   drupal_add_library('gridstack_field', 'gridstack_view', FALSE);
+  drupal_add_css(drupal_get_path('module', 'gridstack_field') . '/css/col-' . $columns . '.min.css');
 
   // Sort items according to '_weight' (needed when the form comes back after
   // preview or failed validation)
@@ -232,10 +229,10 @@ function theme_gridstack_field_items($variables) {
     }
   }
 
-  $output = '<div class="form-item form-item-grid grid-stack width-' . $gridstack_setting->data['width'] . '">';
+  $output = '<div class="form-item form-item-grid grid-stack width-' . $columns . '">';
   // Add the items to grid.
   if (count($items)) {
-    $gridstack_setting_data = $gridstack_setting->data;
+    $gridstack_setting_data = $gridstack_setting->data['items'];
     foreach ($items as $key => $item) {
       // Build grid with items.
       $output .= theme('container', array(
@@ -282,12 +279,13 @@ function gridstack_field_library() {
       '//cdnjs.cloudflare.com/ajax/libs/gridstack.js/0.3.0/gridstack.jQueryUI.min.js' => array(
         'type' => 'external',
       ),
-      drupal_get_path('module', 'gridstack_field') . '/js/gridstack_field.js' => array(),
+      drupal_get_path('module', 'gridstack_field') . '/js/gridstack_field.min.js' => array('type' => 'file','scope' => 'footer'),
     ),
     'css' => array(
       '//cdnjs.cloudflare.com/ajax/libs/gridstack.js/0.3.0/gridstack.min.css' => array(
         'type' => 'external',
       ),
+      drupal_get_path('module', 'gridstack_field') . '/css/gridstack_field.min.css' => array(),
     ),
   );
   $libraries['gridstack_view'] = array(
@@ -298,13 +296,12 @@ function gridstack_field_library() {
       '//cdn.jsdelivr.net/npm/lodash@4.17.5/lodash.min.js' => array(
         'type' => 'external',
       ),
-      drupal_get_path('module', 'gridstack_field') . '/js/gridstack_field_view.js' => array(),
+      drupal_get_path('module', 'gridstack_field') . '/js/gridstack_field_view.min.js' => array(),
     ),
     'css' => array(
       '//cdnjs.cloudflare.com/ajax/libs/gridstack.js/0.3.0/gridstack.min.css' => array(
         'type' => 'external',
       ),
-      drupal_get_path('module', 'gridstack_field') . '/css/gridstack_field.min.css' => array(),
     ),
   );
 
@@ -333,7 +330,17 @@ function gridstack_field_node_insert($node) {
   $cached_data = cache_get('grid_items' . session_id());
   if ($cached_data) {
     gridstack_field_save($node->nid, $cached_data->data);
-
     cache_clear_all('grid_items' . session_id(), 'cache', FALSE);
   }
+}
+
+function gridstack_field_init() {
+//  $cached_data = cache_get('grid_items' . session_id());
+//  dsm($cached_data, 'CACHE');
+}
+
+function gridstack_field_form_article_node_form_alter(&$form, &$form_state, $form_id) {
+//  dsm($form);
+//  $form['field_gridy']['#access'] = FALSE;
+//  unset($form['grid_settings']);
 }

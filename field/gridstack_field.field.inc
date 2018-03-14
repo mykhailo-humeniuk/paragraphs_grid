@@ -12,11 +12,12 @@ function gridstack_field_field_widget_info() {
       'field types' => array('paragraphs'),
       'settings' => array(
         'grid_settings' => array(
-          'width' => 12,
-          'alwaysShowResizeHandle' => false,
+          'alwaysShowResizeHandle' => 0,
+          'float' => 0,
           'cellHeight' => 60,
-          'verticalMargin' => 20,
           'height' => 0,
+          'verticalMargin' => 20,
+          'width' => 12,
         ),
       ),
       'behaviors' => array(
@@ -41,33 +42,26 @@ function gridstack_field_field_widget_settings_form($field, $instance) {
       '#collapsed' => FALSE,
     );
 
-    $form['grid_settings']['width'] = array(
-      '#type' => 'textfield',
-      '#title' => t('width'),
-      '#default_value' =>  (isset($settings['width'])) ? $settings['width'] : 12,
-      '#size' => 60,
-      '#maxlength' => 128,
-    );
     $form['grid_settings']['alwaysShowResizeHandle'] = array(
-      '#type' => 'textfield',
+      '#type' => 'checkbox',
       '#title' => t('alwaysShowResizeHandle'),
-      '#default_value' => (isset($settings['alwaysShowResizeHandle'])) ? $settings['alwaysShowResizeHandle'] : 'false',
-      '#size' => 60,
-      '#maxlength' => 128,
+      '#default_value' => (isset($settings['alwaysShowResizeHandle'])) ? $settings['alwaysShowResizeHandle'] : 0,
+      '#description' => t('If checked the resizing handles are shown even if the user is not hovering over the widget '),
     );
+    $form['grid_settings']['float'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Float'),
+      '#default_value' => (isset($settings['float'])) ? $settings['float'] : 0,
+      '#description' => t('Enable floating widgets'),
+    );
+
     $form['grid_settings']['cellHeight'] = array(
       '#type' => 'textfield',
       '#title' => t('cellHeight'),
       '#default_value' => (isset($settings['cellHeight'])) ? $settings['cellHeight'] : 60,
       '#size' => 60,
       '#maxlength' => 128,
-    );
-    $form['grid_settings']['verticalMargin'] = array(
-      '#type' => 'textfield',
-      '#title' => t('verticalMargin'),
-      '#default_value' => (isset($settings['verticalMargin'])) ? $settings['verticalMargin'] : 20,
-      '#size' => 60,
-      '#maxlength' => 128,
+      '#description' => t('One cell height in pixels'),
     );
     $form['grid_settings']['height'] = array(
       '#type' => 'textfield',
@@ -75,6 +69,23 @@ function gridstack_field_field_widget_settings_form($field, $instance) {
       '#default_value' => (isset($settings['height'])) ? $settings['height'] : 0,
       '#size' => 60,
       '#maxlength' => 128,
+      '#description' => t('Maximum rows amount. Default is 0 which means no maximum rows'),
+    );
+    $form['grid_settings']['verticalMargin'] = array(
+      '#type' => 'textfield',
+      '#title' => t('verticalMargin'),
+      '#default_value' => (isset($settings['verticalMargin'])) ? $settings['verticalMargin'] : 20,
+      '#size' => 60,
+      '#maxlength' => 128,
+      '#description' => t('Vertical gap size in pixels'),
+    );
+    $form['grid_settings']['width'] = array(
+      '#type' => 'textfield',
+      '#title' => t('width'),
+      '#default_value' =>  (isset($settings['width'])) ? intval($settings['width']) : 12,
+      '#size' => 60,
+      '#maxlength' => 128,
+      '#description' => t('Amount of columns'),
     );
   }
 
@@ -102,20 +113,148 @@ function gridstack_field_field_widget_form(&$form, &$form_state, $field, $instan
  */
 function gridstack_field_field_multiple_value_form($field, $instance, $langcode, $items, &$form, &$form_state, $delta, $original_element) {
   $form['#submit'][] = 'gridstack_field_field_widget_form_submit';
+
+  // Add grid comfig form on node add page.
+  if (!isset($form['#node']->nid)) {
+    $settings = $instance['widget']['settings']['grid_settings'];
+
+    // Transform string values to int.
+    $settings['cellHeight'] = intval($settings['cellHeight']);
+    $settings['height'] = intval($settings['height']);
+    $settings['verticalMargin'] = intval($settings['verticalMargin']);
+    $settings['width'] = intval($settings['width']);
+
+    $form['grid_settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Grid settings'),
+      '#weight' => 0,
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+      '#suffix' => '</div>',
+      '#prefix' => '<div id="grid-settings">'
+    );
+
+    $form['grid_settings']['alwaysShowResizeHandle'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('alwaysShowResizeHandle'),
+      '#default_value' => $settings['alwaysShowResizeHandle'],
+      '#description' => t('If checked the resizing handles are shown even if the user is not hovering over the widget '),
+    );
+    $form['grid_settings']['float'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Float'),
+      '#default_value' => $settings['float'],
+      '#description' => t('Enable floating widgets'),
+    );
+
+    $form['grid_settings']['cellHeight'] = array(
+      '#type' => 'textfield',
+      '#title' => t('cellHeight'),
+      '#default_value' => $settings['cellHeight'],
+      '#size' => 60,
+      '#maxlength' => 128,
+      '#description' => t('One cell height in pixels'),
+    );
+    $form['grid_settings']['height'] = array(
+      '#type' => 'textfield',
+      '#title' => t('height'),
+      '#default_value' => $settings['height'],
+      '#size' => 60,
+      '#maxlength' => 128,
+      '#description' => t('Maximum rows amount. Default is 0 which means no maximum rows'),
+    );
+    $form['grid_settings']['verticalMargin'] = array(
+      '#type' => 'textfield',
+      '#title' => t('verticalMargin'),
+      '#default_value' => $settings['verticalMargin'],
+      '#size' => 60,
+      '#maxlength' => 128,
+      '#description' => t('Vertical gap size in pixels'),
+    );
+    $form['grid_settings']['width'] = array(
+      '#type' => 'textfield',
+      '#title' => t('width'),
+      '#default_value' => $settings['width'],
+      '#size' => 60,
+      '#maxlength' => 128,
+      '#description' => t('Amount of columns'),
+    );
+
+    $form['grid_settings']['actions']['save'] = array(
+      '#type' => 'button',
+      '#value' => t('Save grid'),
+      '#name' => 'grid',
+      '#validate' => array(),
+      '#limit_validation_errors' => array(),
+      '#ajax' => array(
+        'callback' => 'grid_replace_js',
+      ),
+    );
+  }
+
+//  drupal_add_js(array('gridstack_field' => array('settings' => $settings)), array('type' => 'setting'));
+
   $field_elements = paragraphs_field_multiple_value_form($field, $instance, $langcode, $items, $form, $form_state, $delta, $original_element);
   // Use own theme function.
   $field_elements['#theme'] = 'gridstack_field_field_multiple_value_form';
   // Install Gridstack library on the page.
   drupal_add_library('gridstack_field', 'gridstack', FALSE);
 
-  // .
+  // Need to clear cache on every add/edit page load.
+  cache_clear_all('grid_items' . session_id(), 'cache', FALSE);
+  // Fill in drupal cache and pass settings to our scripts.
   if ($form['nid']['#value']) {
     cache_clear_all('grid_items' . session_id(), 'cache', FALSE);
 
     $db_data = gridstack_field_load($form['nid']['#value']);
-    cache_set('grid_items' . session_id(), $db_data->data, 'cache', CACHE_PERMANENT);
+    if (isset($db_data->data)) {
+      // Pass gridd settings into our scripts.
+      drupal_add_js(array('gridstack_field' => array('settings' => $db_data->data['settings'])), array('type' => 'setting'));
+      // Warm up cache.
+      cache_set('grid_items' . session_id(), $db_data->data, 'cache', CACHE_PERMANENT);
+    }
   }
   return $field_elements;
+//  return '';
+}
+
+/**
+ * @param $form
+ * @param $form_state
+ *
+ * @return array
+ */
+function grid_replace_js($form, &$form_state) {
+  // drupal_html_id() very helpfully ensures that all html IDS are unique
+  // on a page. Unfortunately what it doesn't realize is that the IDs
+  // we are generating are going to replace IDs that already exist, so
+  // this actually works against us.
+  if (isset($_POST['ajax_html_ids'])) {
+    unset($_POST['ajax_html_ids']);
+  }
+
+  // Pass grid settings into our scripts.
+  $settings = array();
+  $grid_settings = $form_state['complete form']['grid_settings'];
+  $settings['alwaysShowResizeHandle'] = $grid_settings['alwaysShowResizeHandle']['#value'];
+  $settings['float'] = $grid_settings['float']['#value'];
+  $settings['cellHeight'] = intval($grid_settings['cellHeight']['#value']);
+  $settings['height'] = intval($grid_settings['height']['#value']);
+  $settings['verticalMargin'] = intval($grid_settings['verticalMargin']['#value']);
+  $settings['width'] = intval($grid_settings['width']['#value']);
+
+  drupal_add_js(array('gridstack_field' => array('settings' => $settings)), array('type' => 'setting'));
+
+  $commands = array();
+  $commands[] = ajax_command_invoke('#grid-settings','remove');
+  $commands[] = ajax_command_invoke('.field-widget-paragraphs-gridstack', 'show');
+
+  $return = array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+
+  return $return;
 }
 
 /**

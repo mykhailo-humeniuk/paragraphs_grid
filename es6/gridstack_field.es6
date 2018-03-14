@@ -7,6 +7,36 @@
   'use strict';
   
   /**
+   * Custom wrapper for grid library.
+   */
+  class Grid {
+    constructor(selector = '.grid-stack') {
+      this.selector = selector;
+      this.setuped = 0;
+    }
+    
+    setOptions(options) {
+      this.options = options;
+      return this;
+    }
+    
+    applyListentrs() {
+
+    }
+    
+    setup() {
+      // $(this.selector).gridstack(this.options);
+      // if (!this.setuped) {
+      //   this.setuped = 1;
+      // }
+    }
+    
+    debug() {
+      console.log(this);
+    }
+  }
+  
+  /**
    * Helper function.
    *
    * Add data to json field and send to drupal callback.
@@ -15,8 +45,6 @@
     const { basePath, pathPrefix } = Drupal.settings;
     const href = `${basePath}${pathPrefix}grid_update`;
     const post = "grid_items=" + JSON.stringify(jsonData);
-    let { localStorage } = window;
-    localStorage.setItem('gridItems', JSON.stringify(jsonData));
     
     // Send data to drupal side.
     $.ajax({
@@ -28,36 +56,38 @@
       }
     });
   }
+  
+  // Global constants;
+  const $body = $('body');
+  const NODE_ADD_PAGE = $body.hasClass('page-node-add');
+  let grid = new Grid('.form-item-grid');
 
   /**
    * Implements grid and backbone collections on node edit page.
    */
   Drupal.behaviors.gridstackField = {
     attach: function (context, settings) {
-      const $body = $('body');
-      let input = '';
-      let data = '';
       const $fieldGridstack = $('.form-item-grid');
-      const options = {
-        alwaysShowResizeHandle: false,
-        animate: false,
-        cellHeight: '50px',
-        verticalMargin: 0,
-        width: 12,
-        float: false
-      };
-
-      let myStorage = window.localStorage;
-
-      $fieldGridstack.gridstack(options);
-
+      let options = {};
+      if (typeof settings.gridstack_field !== 'undefined') {
+        options = settings.gridstack_field.settings;
+        $fieldGridstack.gridstack(options);
+        
+        // grid.setOptions(options);
+        // grid.setup();
+      }
+      
       // Fill in JSON field with parameters from grid items.
       (function () {
         const $grid_container = $('.form-item-grid');
+        const $new_element = $grid_container.find('.ajax-new-content');
         let $grid_items = $grid_container.find('.grid-stack-item.ui-draggable.ui-resizable');
-        let myStorage = window.localStorage;
-        let jsonFieldData = (myStorage.getItem('gridItems')) ? JSON.parse(myStorage.getItem('gridItems')) : [];
+        let jsonFieldData = {};
+        jsonFieldData.items = [];
+        jsonFieldData.settings = options;
 
+        // if ($new_element.length) {
+        // }
 
         // Fill in cache if field with json is not empty.
         if ($grid_items.length) {
@@ -69,7 +99,7 @@
               height: $(item).data('gs-height'),
               delta: $(item).data('delta')
             };
-            jsonFieldData.push(obj);
+            jsonFieldData.items.push(obj);
           });
           _saveParagraphPosition(jsonFieldData);
         }
@@ -94,13 +124,13 @@
                 };
 
                 if ((jsonFieldData.length === 0) || (items[i].el[0].dataset.delta === jsonFieldData.length)) {
-                  jsonFieldData.push(obj);
+                  jsonFieldData.items.push(obj);
                 }
                 else {
-                  jsonFieldData[this.el[0].dataset.delta].x = this.x;
-                  jsonFieldData[this.el[0].dataset.delta].y = this.y;
-                  jsonFieldData[this.el[0].dataset.delta].width = this.width;
-                  jsonFieldData[this.el[0].dataset.delta].height = this.height;
+                  jsonFieldData.items[this.el[0].dataset.delta].x = this.x;
+                  jsonFieldData.items[this.el[0].dataset.delta].y = this.y;
+                  jsonFieldData.items[this.el[0].dataset.delta].width = this.width;
+                  jsonFieldData.items[this.el[0].dataset.delta].height = this.height;
                 }
 
                 // Update custom element with value of item height.
