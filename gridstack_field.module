@@ -334,13 +334,8 @@ function gridstack_field_node_insert($node) {
   }
 }
 
-function gridstack_field_init() {
+// Debugs.
+//function gridstack_field_init() {
 //  $cached_data = cache_get('grid_items' . session_id());
 //  dsm($cached_data, 'CACHE');
-}
-
-function gridstack_field_form_article_node_form_alter(&$form, &$form_state, $form_id) {
-//  dsm($form);
-//  $form['field_gridy']['#access'] = FALSE;
-//  unset($form['grid_settings']);
-}
+//}

@@ -4,4 +4,4 @@ package = Fields
 core = 7.x
 
 dependencies[] = paragraphs
-dependencies[] = jquery_update.info
+dependencies[] = jquery_update

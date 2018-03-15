@@ -197,25 +197,29 @@ function gridstack_field_field_multiple_value_form($field, $instance, $langcode,
   $field_elements = paragraphs_field_multiple_value_form($field, $instance, $langcode, $items, $form, $form_state, $delta, $original_element);
   // Use own theme function.
   $field_elements['#theme'] = 'gridstack_field_field_multiple_value_form';
-  // Install Gridstack library on the page.
-  drupal_add_library('gridstack_field', 'gridstack', FALSE);
 
-  // Need to clear cache on every add/edit page load.
-  cache_clear_all('grid_items' . session_id(), 'cache', FALSE);
-  // Fill in drupal cache and pass settings to our scripts.
-  if ($form['nid']['#value']) {
+  // This code needs to be executed only once on first page load.
+  if (empty($form_state['values'])) {
+    // Install Gridstack library on the page.
+    drupal_add_library('gridstack_field', 'gridstack', FALSE);
+
+    // Need to clear cache on every add/edit page load.
     cache_clear_all('grid_items' . session_id(), 'cache', FALSE);
+    // Fill in drupal cache and pass settings to our scripts.
+    if ($form['nid']['#value']) {
+      cache_clear_all('grid_items' . session_id(), 'cache', FALSE);
 
-    $db_data = gridstack_field_load($form['nid']['#value']);
-    if (isset($db_data->data)) {
-      // Pass gridd settings into our scripts.
-      drupal_add_js(array('gridstack_field' => array('settings' => $db_data->data['settings'])), array('type' => 'setting'));
-      // Warm up cache.
-      cache_set('grid_items' . session_id(), $db_data->data, 'cache', CACHE_PERMANENT);
+      $db_data = gridstack_field_load($form['nid']['#value']);
+      if (isset($db_data->data)) {
+        // Pass gridd settings into our scripts.
+        drupal_add_js(array('gridstack_field' => array('settings' => $db_data->data['settings'])), array('type' => 'setting'));
+        // Warm up cache.
+        cache_set('grid_items' . session_id(), $db_data->data, 'cache', CACHE_PERMANENT);
+      }
     }
   }
+
   return $field_elements;
-//  return '';
 }
 
 /**

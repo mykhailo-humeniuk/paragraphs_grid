@@ -9,32 +9,28 @@
   /**
    * Custom wrapper for grid library.
    */
-  class Grid {
-    constructor(selector = '.grid-stack') {
-      this.selector = selector;
-      this.setuped = 0;
-    }
-    
-    setOptions(options) {
-      this.options = options;
-      return this;
-    }
-    
-    applyListentrs() {
-
-    }
-    
-    setup() {
-      // $(this.selector).gridstack(this.options);
-      // if (!this.setuped) {
-      //   this.setuped = 1;
-      // }
-    }
-    
-    debug() {
-      console.log(this);
-    }
-  }
+  // class Grid {
+  //   constructor(selector = '.grid-stack') {
+  //     this.selector = selector;
+  //   }
+  //
+  //   setOptions(options) {
+  //     this.options = options;
+  //     return this;
+  //   }
+  //
+  //   applyListentrs() {
+  //
+  //   }
+  //
+  //   setup() {
+  //     $(this.selector).gridstack(this.options);
+  //   }
+  //
+  //   debug() {
+  //     console.log(this);
+  //   }
+  // }
   
   /**
    * Helper function.
@@ -58,9 +54,7 @@
   }
   
   // Global constants;
-  const $body = $('body');
-  const NODE_ADD_PAGE = $body.hasClass('page-node-add');
-  let grid = new Grid('.form-item-grid');
+  // let grid = new Grid('.form-item-grid');
 
   /**
    * Implements grid and backbone collections on node edit page.
@@ -89,7 +83,7 @@
         // if ($new_element.length) {
         // }
 
-        // Fill in cache if field with json is not empty.
+        // Warm up cache on page load and add new items.
         if ($grid_items.length) {
           $grid_items.each(function (key, item) {
             var obj = {
