@@ -102,7 +102,7 @@ function theme_gridstack_field_field_multiple_value_form($variables) {
   $output = '';
   $instance = $element['#instance'];
   $cached_data = cache_get('grid_items' . session_id());
-  $columns = (!empty($cached_data) || !empty($cached_data->data['settings']['width'])) ? $cached_data->data['settings']['width'] : 12;
+  $columns = (!empty($cached_data)) ? 'width-' . $cached_data->data['settings']['width'] : '';
 
   if (!isset($instance['settings']['title'])) {
     $instance['settings']['title'] = PARAGRAPHS_DEFAULT_TITLE;
@@ -132,7 +132,7 @@ function theme_gridstack_field_field_multiple_value_form($variables) {
   }
   usort($items, '_field_sort_items_value_helper');
 
-  $output = '<div class="form-item form-item-grid grid-stack width-' . $columns . '"">';
+  $output = '<div class="form-item form-item-grid grid-stack ' . $columns . '"">';
   // Add the items to grid.
   if (count($items)) {
     // Such as Paragraphs rebuild field structure every time when user

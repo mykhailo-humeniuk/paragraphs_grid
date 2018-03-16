@@ -249,6 +249,11 @@ function grid_replace_js($form, &$form_state) {
 
   drupal_add_js(array('gridstack_field' => array('settings' => $settings)), array('type' => 'setting'));
 
+  $data = [];
+  $data['items'] = [];
+  $data['settings'] = $settings;
+  cache_set('grid_items' . session_id(), $data, 'cache', CACHE_PERMANENT);
+
   $commands = array();
   $commands[] = ajax_command_invoke('#grid-settings','remove');
   $commands[] = ajax_command_invoke('.field-widget-paragraphs-gridstack', 'show');
