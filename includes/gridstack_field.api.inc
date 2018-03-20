@@ -15,7 +15,6 @@
  *   Data that contains gridstack data.
  */
 function gridstack_field_save($nid, $data) {
-
   $gridstack = new stdClass();
   $gridstack->nid = $nid;
   $gridstack->data = $data;
@@ -35,10 +34,8 @@ function gridstack_field_save($nid, $data) {
  * @return mixed
  */
 function gridstack_field_load($nid, $reset = FALSE) {
-
   $cache = &drupal_static(__FUNCTION__);
   if (!isset($cache[$nid]) || $reset) {
-
     $cache[$nid] = db_select('gridstack')
       ->fields('gridstack')
       ->condition('nid', $nid)
@@ -46,13 +43,10 @@ function gridstack_field_load($nid, $reset = FALSE) {
       ->fetchObject();
 
     if (!empty($cache[$nid])) {
-
       // Crop data stores serialized so we have to unserialize it before using.
       $cache[$nid]->data = unserialize($cache[$nid]->data);
-
     }
   }
-
   return $cache[$nid];
 }
 
@@ -63,11 +57,9 @@ function gridstack_field_load($nid, $reset = FALSE) {
  *   NID of node.
  */
 function gridstack_field_delete($nid) {
-
   // Load gridstack before deletion to ensure that it exists.
   $gridstack = gridstack_field_load($nid);
   if (!empty($gridstack)) {
-
     // Delete gridstack settings from table by its nid.
     db_delete('gridstack')
       ->condition('nid', $gridstack->nid)

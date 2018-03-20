@@ -9,7 +9,6 @@
  * Implements hook_schema().
  */
 function gridstack_field_schema() {
-
   $schema['gridstack'] = array(
     'description' => 'This table contains gridstack setings',
     'fields' => array(
@@ -30,7 +29,5 @@ function gridstack_field_schema() {
     ),
     'primary key' => array('nid'),
   );
-
   return $schema;
-
 }

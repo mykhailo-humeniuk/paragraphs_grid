@@ -146,10 +146,11 @@ function theme_gridstack_field_field_multiple_value_form($variables) {
         if (!isset($data[$key])) {
           $temporary_json_data = $data;
           usort($temporary_json_data, function($a, $b) {
-            if ($a['y'] == $b['y']) {
-              return 0;
-            }
-            return $a['y'] < $b['y'] ? 1 : -1;
+//            if ($a['y'] == $b['y']) {
+//              return 0;
+//            }
+//            return $a['y'] < $b['y'] ? 1 : -1;
+            return $a['y'] == $b['y'] ? 0 : $a['y'] < $b['y'] ? 1 : -1;
           });
           $max_y = $temporary_json_data[0]['y'] + $temporary_json_data[0]['height'];
         }
@@ -160,7 +161,7 @@ function theme_gridstack_field_field_multiple_value_form($variables) {
             '#attributes' => array(
               'class' => array('grid-stack-item'),
               'data-gs-x' => isset($data[$key]) ? $data[$key]['x'] : 0,
-              'data-gs-y' => isset($data[$key]) ? $data[$key]['y'] : (isset($max_y) ? $max_y : 0),
+              'data-gs-y' => isset($data[$key]) ? $data[$key]['y'] : isset($max_y) ? $max_y : 0,
               'data-gs-width' => isset($data[$key]) ? $data[$key]['width'] : 3,
               'data-gs-height' => isset($data[$key]) ? $data[$key]['height'] : 6,
               'data-delta' => $key,
@@ -319,18 +320,19 @@ function gridstack_field_library() {
 function gridstack_grid_callback() {
   if (!empty($_POST['grid_items'])) {
     $data = drupal_json_decode($_POST['grid_items']);
-    cache_set('grid_items' . session_id(), $data, 'cache', CACHE_PERMANENT);
+    cache_set('grid_items' . session_id(), $data, 'cache_grid', CACHE_PERMANENT);
   }
 }
 
 /**
  * Implements hook_node_insert().
+ * @TODO need to check node type.
  */
 function gridstack_field_node_insert($node) {
   $cached_data = cache_get('grid_items' . session_id());
   if ($cached_data) {
     gridstack_field_save($node->nid, $cached_data->data);
-    cache_clear_all('grid_items' . session_id(), 'cache', FALSE);
+    cache_clear_all('grid_items' . session_id(), 'cache_grid', FALSE);
   }
 }
 
