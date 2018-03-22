@@ -271,7 +271,7 @@ function grid_replace_js($form, &$form_state) {
  */
 function gridstack_field_field_widget_form_submit($form, &$form_state) {
   if ($form['nid']['#value']) {
-    $cached_data = cache_get('grid_items' . session_id());
+    $cached_data = cache_get('grid_items' . session_id(), 'cache_gridstack_field');
     if ($cached_data) {
       gridstack_field_save($form['nid']['#value'], $cached_data->data);
       cache_clear_all('grid_items' . session_id(), 'cache_gridstack_field', FALSE);
