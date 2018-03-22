@@ -102,7 +102,6 @@ function theme_gridstack_field_field_multiple_value_form($variables) {
   $output = '';
   $instance = $element['#instance'];
   $cached_data = cache_get('grid_items' . session_id());
-  dsm($cached_data, '$cached_data');
   $columns = (!empty($cached_data)) ? 'width-' . $cached_data->data['settings']['width'] : '';
 
   if (!isset($instance['settings']['title'])) {
