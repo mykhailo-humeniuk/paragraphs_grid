@@ -102,6 +102,7 @@ function theme_gridstack_field_field_multiple_value_form($variables) {
   $output = '';
   $instance = $element['#instance'];
   $cached_data = cache_get('grid_items' . session_id());
+  dsm($cached_data, '$cached_data');
   $columns = (!empty($cached_data)) ? 'width-' . $cached_data->data['settings']['width'] : '';
 
   if (!isset($instance['settings']['title'])) {
@@ -136,7 +137,7 @@ function theme_gridstack_field_field_multiple_value_form($variables) {
   // Add the items to grid.
   if (count($items)) {
     // Such as Paragraphs rebuild field structure every time when user
-    // add, edit, or remove item we decided to use drupal ccache as temporary
+    // add, edit, or remove item we decided to use drupal cache as temporary
     // storage with grid parameters for using when field rebuilds.
     // If exist cache fill grid items parameters from grid.
     if (!empty($cached_data)) {
@@ -177,10 +178,10 @@ function theme_gridstack_field_field_multiple_value_form($variables) {
           'element' => array('#children' => '<div class="grid-stack-item-content">' . drupal_render($item) . '</div>',
             '#attributes' => array(
               'class' => array('grid-stack-item'),
-              'data-gs-x' => !empty($item['field_position_x'][LANGUAGE_NONE][0]['value']['#value']) ? $item['field_position_x'][LANGUAGE_NONE][0]['value']['#value'] : 0,
-              'data-gs-y' => !empty($item['field_position_y'][LANGUAGE_NONE][0]['value']['#value']) ? $item['field_position_y'][LANGUAGE_NONE][0]['value']['#value'] : 0,
-              'data-gs-width' => !empty($item['field_position_width'][LANGUAGE_NONE][0]['value']['#value']) ? $item['field_position_width'][LANGUAGE_NONE][0]['value']['#value'] : 3,
-              'data-gs-height' => !empty($item['field_position_height'][LANGUAGE_NONE][0]['value']['#value']) ? $item['field_position_height'][LANGUAGE_NONE][0]['value']['#value'] : 6,
+              'data-gs-x' => isset($data[$key]) ? $data[$key]['x'] : 0,
+              'data-gs-y' => isset($data[$key]) ? $data[$key]['y'] : 0,
+              'data-gs-width' => isset($data[$key]) ? $data[$key]['width'] : 3,
+              'data-gs-height' => isset($data[$key]) ? $data[$key]['height'] : 6,
               'data-delta' => $key,
             ))
         ));
@@ -320,7 +321,7 @@ function gridstack_field_library() {
 function gridstack_grid_callback() {
   if (!empty($_POST['grid_items'])) {
     $data = drupal_json_decode($_POST['grid_items']);
-    cache_set('grid_items' . session_id(), $data, 'cache_grid', CACHE_PERMANENT);
+    cache_set('grid_items' . session_id(), $data, 'cache_gridstack_field', CACHE_PERMANENT);
   }
 }
 
@@ -332,7 +333,7 @@ function gridstack_field_node_insert($node) {
   $cached_data = cache_get('grid_items' . session_id());
   if ($cached_data) {
     gridstack_field_save($node->nid, $cached_data->data);
-    cache_clear_all('grid_items' . session_id(), 'cache_grid', FALSE);
+    cache_clear_all('grid_items' . session_id(), 'cache_gridstack_field', FALSE);
   }
 }
 
@@ -341,3 +342,10 @@ function gridstack_field_node_insert($node) {
 //  $cached_data = cache_get('grid_items' . session_id());
 //  dsm($cached_data, 'CACHE');
 //}
+
+/**
+ * Implements hook_flush_caches().
+ */
+function gridstack_field_flush_caches() {
+  return array('cache_gridstack_field');
+}

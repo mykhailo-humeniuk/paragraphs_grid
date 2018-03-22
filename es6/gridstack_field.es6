@@ -72,20 +72,16 @@
       }
       
       // Fill in JSON field with parameters from grid items.
-      (function () {
-        const $grid_container = $('.form-item-grid');
-        const $new_element = $grid_container.find('.ajax-new-content');
-        let $grid_items = $grid_container.find('.grid-stack-item.ui-draggable.ui-resizable');
+      // (function () {
+        const $gridContainer = $('.form-item-grid');
+        let $gridItems = $gridContainer.find('.grid-stack-item.ui-draggable.ui-resizable');
         let jsonFieldData = {};
         jsonFieldData.items = [];
         jsonFieldData.settings = options;
 
-        // if ($new_element.length) {
-        // }
-
         // Warm up cache on page load and add new items.
-        if ($grid_items.length) {
-          $grid_items.each(function (key, item) {
+        if ($gridItems.length) {
+          $gridItems.each(function (key, item) {
             var obj = {
               x: $(item).data('gs-x'),
               y: $(item).data('gs-y'),
@@ -100,7 +96,7 @@
 
         $('.field-widget-paragraphs-gridstack').once('save-item', function () {
           // Add custom element with value of item height.
-          $grid_items.each(function (key, item) {
+          $gridItems.each(function (key, item) {
             let height = $(item).data('gs-height');
             height = 'Height: ' + (height * 50) + 'px';
             $(item).find('.grid-stack-item-content').prepend('<div class="height-counter">' + height + '</div>');
@@ -129,15 +125,15 @@
 
                 // Update custom element with value of item height.
                 var height = this.height;
-                var $height_container = $(items[i].el[0]).find('.height-counter');
+                var $heightContainer = $(items[i].el[0]).find('.height-counter');
                 height = 'Height: ' + (height * 50) + 'px';
-                $height_container.text(height);
+                $heightContainer.text(height);
               });
               _saveParagraphPosition(jsonFieldData);
             }
           });
         });
-      })();
+      // })();
 
     }
   };

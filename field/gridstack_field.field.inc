@@ -44,7 +44,7 @@ function gridstack_field_field_widget_settings_form($field, $instance) {
 
     $form['grid_settings']['alwaysShowResizeHandle'] = array(
       '#type' => 'checkbox',
-      '#title' => t('alwaysShowResizeHandle'),
+      '#title' => t('Always show resize handle'),
       '#default_value' => isset($settings['alwaysShowResizeHandle']) ? $settings['alwaysShowResizeHandle'] : 0,
       '#description' => t('If checked the resizing handles are shown even if the user is not hovering over the widget '),
     );
@@ -57,7 +57,7 @@ function gridstack_field_field_widget_settings_form($field, $instance) {
 
     $form['grid_settings']['cellHeight'] = array(
       '#type' => 'textfield',
-      '#title' => t('cellHeight'),
+      '#title' => t('Cell height'),
       '#default_value' => isset($settings['cellHeight']) ? $settings['cellHeight'] : 60,
       '#size' => 60,
       '#maxlength' => 128,
@@ -65,7 +65,7 @@ function gridstack_field_field_widget_settings_form($field, $instance) {
     );
     $form['grid_settings']['height'] = array(
       '#type' => 'textfield',
-      '#title' => t('height'),
+      '#title' => t('Height'),
       '#default_value' => isset($settings['height']) ? $settings['height'] : 0,
       '#size' => 60,
       '#maxlength' => 128,
@@ -73,7 +73,7 @@ function gridstack_field_field_widget_settings_form($field, $instance) {
     );
     $form['grid_settings']['verticalMargin'] = array(
       '#type' => 'textfield',
-      '#title' => t('verticalMargin'),
+      '#title' => t('Vertical margin'),
       '#default_value' => isset($settings['verticalMargin']) ? $settings['verticalMargin'] : 20,
       '#size' => 60,
       '#maxlength' => 128,
@@ -81,7 +81,7 @@ function gridstack_field_field_widget_settings_form($field, $instance) {
     );
     $form['grid_settings']['width'] = array(
       '#type' => 'textfield',
-      '#title' => t('width'),
+      '#title' => t('Width'),
       '#default_value' =>  isset($settings['width']) ? intval($settings['width']) : 12,
       '#size' => 60,
       '#maxlength' => 128,
@@ -136,7 +136,7 @@ function gridstack_field_field_multiple_value_form($field, $instance, $langcode,
 
     $form['grid_settings']['alwaysShowResizeHandle'] = array(
       '#type' => 'checkbox',
-      '#title' => t('alwaysShowResizeHandle'),
+      '#title' => t('Always show resize handle'),
       '#default_value' => $settings['alwaysShowResizeHandle'],
       '#description' => t('If checked the resizing handles are shown even if the user is not hovering over the widget '),
     );
@@ -149,7 +149,7 @@ function gridstack_field_field_multiple_value_form($field, $instance, $langcode,
 
     $form['grid_settings']['cellHeight'] = array(
       '#type' => 'textfield',
-      '#title' => t('cellHeight'),
+      '#title' => t('Cell height'),
       '#default_value' => $settings['cellHeight'],
       '#size' => 60,
       '#maxlength' => 128,
@@ -157,7 +157,7 @@ function gridstack_field_field_multiple_value_form($field, $instance, $langcode,
     );
     $form['grid_settings']['height'] = array(
       '#type' => 'textfield',
-      '#title' => t('height'),
+      '#title' => t('Height'),
       '#default_value' => $settings['height'],
       '#size' => 60,
       '#maxlength' => 128,
@@ -165,7 +165,7 @@ function gridstack_field_field_multiple_value_form($field, $instance, $langcode,
     );
     $form['grid_settings']['verticalMargin'] = array(
       '#type' => 'textfield',
-      '#title' => t('verticalMargin'),
+      '#title' => t('Vertical margin'),
       '#default_value' => $settings['verticalMargin'],
       '#size' => 60,
       '#maxlength' => 128,
@@ -173,7 +173,7 @@ function gridstack_field_field_multiple_value_form($field, $instance, $langcode,
     );
     $form['grid_settings']['width'] = array(
       '#type' => 'textfield',
-      '#title' => t('width'),
+      '#title' => t('Width'),
       '#default_value' => $settings['width'],
       '#size' => 60,
       '#maxlength' => 128,
@@ -204,17 +204,17 @@ function gridstack_field_field_multiple_value_form($field, $instance, $langcode,
     drupal_add_library('gridstack_field', 'gridstack', FALSE);
 
     // Need to clear cache on every add/edit page load.
-    cache_clear_all('grid_items' . session_id(), 'cache_grid', FALSE);
+    if (cache_get('grid_items' . session_id(), 'cache_gridstack_field')) {
+      cache_clear_all('grid_items' . session_id(), 'cache_gridstack_field', FALSE);
+    }
     // Fill in drupal cache and pass settings to our scripts.
     if ($form['nid']['#value']) {
-      cache_clear_all('grid_items' . session_id(), 'cache_grid', FALSE);
-
       $db_data = gridstack_field_load($form['nid']['#value']);
       if (isset($db_data->data)) {
         // Pass gridd settings into our scripts.
         drupal_add_js(array('gridstack_field' => array('settings' => $db_data->data['settings'])), array('type' => 'setting'));
         // Warm up cache.
-        cache_set('grid_items' . session_id(), $db_data->data, 'cache_grid', CACHE_PERMANENT);
+        cache_set('grid_items' . session_id(), $db_data->data, 'cache_gridstack_field', CACHE_PERMANENT);
       }
     }
   }
@@ -252,7 +252,7 @@ function grid_replace_js($form, &$form_state) {
   $data = [];
   $data['items'] = [];
   $data['settings'] = $settings;
-  cache_set('grid_items' . session_id(), $data, 'cache_grid', CACHE_PERMANENT);
+  cache_set('grid_items' . session_id(), $data, 'cache_gridstack_field', CACHE_PERMANENT);
 
   $commands = array();
   $commands[] = ajax_command_invoke('#grid-settings','remove');
@@ -272,9 +272,10 @@ function grid_replace_js($form, &$form_state) {
 function gridstack_field_field_widget_form_submit($form, &$form_state) {
   if ($form['nid']['#value']) {
     $cached_data = cache_get('grid_items' . session_id());
-    gridstack_field_save($form['nid']['#value'], $cached_data->data);
-
-    cache_clear_all('grid_items' . session_id(), 'cache_grid', FALSE);
+    if ($cached_data) {
+      gridstack_field_save($form['nid']['#value'], $cached_data->data);
+      cache_clear_all('grid_items' . session_id(), 'cache_gridstack_field', FALSE);
+    }
   }
 }
 

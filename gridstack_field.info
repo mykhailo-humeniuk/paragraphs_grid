@@ -1,5 +1,5 @@
 name = Gridstack field
-description = "Add a formatter "
+description = "Add a field formatter for Paragraphs fields"
 package = Fields
 core = 7.x
 

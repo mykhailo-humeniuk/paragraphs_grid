@@ -10,7 +10,7 @@
  */
 function gridstack_field_schema() {
   $schema['gridstack'] = array(
-    'description' => 'This table contains gridstack setings',
+    'description' => 'This table contains gridstack settings',
     'fields' => array(
       'nid' => array(
         'description' => 'The Nid to node',
@@ -29,5 +29,6 @@ function gridstack_field_schema() {
     ),
     'primary key' => array('nid'),
   );
+  $schema['cache_gridstack_field'] = drupal_get_schema_unprocessed('system', 'cache');
   return $schema;
 }
