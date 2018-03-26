@@ -161,7 +161,7 @@ function theme_gridstack_field_field_multiple_value_form($variables) {
             '#attributes' => array(
               'class' => array('grid-stack-item'),
               'data-gs-x' => isset($data[$key]) ? $data[$key]['x'] : 0,
-              'data-gs-y' => isset($data[$key]) ? $data[$key]['y'] : isset($max_y) ? $max_y : 0,
+              'data-gs-y' => isset($data[$key]) ? $data[$key]['y'] : (isset($max_y) ? $max_y : 0),
               'data-gs-width' => isset($data[$key]) ? $data[$key]['width'] : 3,
               'data-gs-height' => isset($data[$key]) ? $data[$key]['height'] : 6,
               'data-delta' => $key,
@@ -214,12 +214,14 @@ function theme_gridstack_field_field_multiple_value_form($variables) {
  */
 function theme_gridstack_field_items($variables) {
   $gridstack_setting = gridstack_field_load($variables['element']['#object']->nid);
+  $settings = $gridstack_setting->data['settings'];
   $element = $variables['element'];
-  $columns = $gridstack_setting->data['settings']['width'];
+  $columns =  $settings['width'];
   $output = '';
 
   drupal_add_library('gridstack_field', 'gridstack_view', FALSE);
   drupal_add_css(drupal_get_path('module', 'gridstack_field') . '/css/col-' . $columns . '.min.css');
+  drupal_add_js(array('gridstack_field' => array('settings' => $settings)), array('type' => 'setting'));
 
   // Sort items according to '_weight' (needed when the form comes back after
   // preview or failed validation)
@@ -329,18 +331,12 @@ function gridstack_grid_callback() {
  * @TODO need to check node type.
  */
 function gridstack_field_node_insert($node) {
-  $cached_data = cache_get('grid_items' . session_id());
+  $cached_data = cache_get('grid_items' . session_id(), 'cache_gridstack_field');
   if ($cached_data) {
     gridstack_field_save($node->nid, $cached_data->data);
     cache_clear_all('grid_items' . session_id(), 'cache_gridstack_field', FALSE);
   }
 }
-
-// Debugs.
-//function gridstack_field_init() {
-//  $cached_data = cache_get('grid_items' . session_id(), 'cache_gridstack_field');
-//  dsm($cached_data, 'CACHE');
-//}
 
 /**
  * Implements hook_flush_caches().
